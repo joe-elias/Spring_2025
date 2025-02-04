@@ -299,6 +299,13 @@ abline(a = a, b= b)
 
 # residual resampling
 
+# the steps to residual bootstrapping are the same as above with one extra step 
+# in the beginning. First we fit the model to the data and extract the residual
+# and fitted values. Rather than resampling cases, we will use the assumption that
+# errors are random and independent. We will resample the residuals like above, and then
+# add the residuals to the fitted values to get a new set of y values. We then 
+# fit the model again and extract our coefficients. Rinse and repeat:
+
 # first, fit the model
 
 
@@ -311,7 +318,8 @@ abline(a = a, b= b)
 # now we resample with replacement the residuals
 
 
-# now estimate the coefficient for each bootstrap replicate
+# now estimate the coefficient for each bootstrap replicate, remember to 
+# add the resampled residuals to the fitted y values.
 
 
 
