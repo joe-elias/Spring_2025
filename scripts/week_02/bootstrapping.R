@@ -74,6 +74,7 @@
 # that the real mean is 0 (otherwise known as a p-value)
 
 
+# does this match the p-value from a t-test?
 
 
 # Confidence Intervals ----------------------------------------------------
