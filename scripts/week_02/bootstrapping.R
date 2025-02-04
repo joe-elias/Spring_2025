@@ -3,8 +3,7 @@
 
 
 # let's start by constructing a sampling distribution of the mean for a normal population with
-# mean 0 and standard deviation of 1 and an n 0f 10. Remember that the sampling distribution
-# of the mean
+# mean 0 and standard deviation of 1 and an n 0f 10.
 
 # sample size
 
