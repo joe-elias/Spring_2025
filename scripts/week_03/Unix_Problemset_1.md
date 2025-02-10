@@ -56,5 +56,51 @@ Once downloaded, open the Git Bash application
 ![image](https://github.com/user-attachments/assets/b1ff847d-603c-4a3d-af0a-383da8f529c2)
 
 
+You can open many Terminal windows at once. This is often helpful. A common way to work is to open your code editor in one window, run the code from another and view data and files in another.
+
+### OK. I've Logged in.  What Now?
+
+
+Mac terminal windows run **shell** called "zsh", **bash** for Windows. The shell is a loop that:
+1. Prints a prompt
+2. Reads a line of input from the keyboard
+3. Parses the line into one or more commands
+4. Executes the commands (which usually print some output to the terminal)
+5. Go back step 1.
+
+
+There are many different shells with bizarre names like **bash**, **sh**, **csh**, **tcsh**, **ksh**, and **zsh**.  The "sh" part means shell.  Each shell has slightly different syntax and features.
+
+### Command Line Prompt
+
+
+Most of bioinformatics is done by running command line software in a shell, so you should take some time to learn to use the shell effectively.
+
+
+This is a command line prompt:
+
+```
+bush202>
+```
+
+
+This is another:
+
+```
+(~) 51%
+```
+
+This is another:
+
+```
+robda@LAPTOP-5VM2NF6A MINGW64 ~
+$
+```
+
+What you see depends on how the system administrator has customized your login.  You can customize it yourself (but we won't go into that here)
+
+
+The prompt tells you the shell is ready for you to type a command.  Most commands run almost instantly, but if you run a long command, the prompt will not reappear until it is finished and the system is ready to accept your next request.
+
 
 
