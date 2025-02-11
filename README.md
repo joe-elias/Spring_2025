@@ -12,4 +12,4 @@ bootstrapping while continuing to build our R skills.
 
 ### Week 3
 
-We get an introduction to and practice working from the command line!
+We get an introduction to--and practice working from--the command line!
