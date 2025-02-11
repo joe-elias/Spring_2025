@@ -21,13 +21,13 @@ The Unix OS is complicated and there are always more things to learn about it. W
 #### Mac
 Use the Finder to navigate to _Applications->Utilities_ and double-click on the _Terminal_ application. This will bring up a window like the following:
 
-![image](https://github.com/user-attachments/assets/16c913c0-24a4-425a-abcd-c4739692d1f4)
+<img src="../../images/terminal_screenshot_mac.png" alt="terminal_screenshot_mac.png" style="zoom:90%;" />
 
 
 #### Windows
 Once downloaded, open the Git Bash application
 
-![image](https://github.com/user-attachments/assets/b1ff847d-603c-4a3d-af0a-383da8f529c2)
+<img src="../../images/terminal_screenshot_win.png" alt="terminal_screenshot_win.png" style="zoom:90%;" />
 
 
 You can open many Terminal windows at once. This is often helpful. A common way to work is to open your code editor in one window, run the code from another and view data and files in another.
@@ -167,7 +167,7 @@ A computer comes with a place to store scripts, data, images, OS, and other file
 
 **Example diagram of a Linux directory structure starting from the root directory**
 
-![image](https://github.com/user-attachments/assets/ea6c7dd3-4b45-42d5-856e-f9f140dc9571)
+<img src="../../images/directory_structure.png" alt="directory_structure.png">
 
 ### The Home Directory '~'
 
