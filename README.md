@@ -9,3 +9,7 @@ Warming up our coding muscles after winter break with some Rosalind Questions!
 
 We review some basics of inferential statistics and build conceptual understanding of
 bootstrapping while continuing to build our R skills.
+
+### Week 3
+
+We get an introduction to and practice working from the command line!
