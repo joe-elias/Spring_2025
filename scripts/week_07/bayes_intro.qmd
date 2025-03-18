@@ -113,7 +113,11 @@ Ok, we have a way to simulate picking 11 socks for a given $N$ and $prop_p$. Now
 
 Discuss and play around with distributions in `R` until you are happy with your choice of priors!
 
-```{r eval=FALSE}
+```{r}
+size = 70/(9^2 - 70)
+hist(rnbinom(1e4, mu = 70, size = size))
+
+hist(rbeta(1e4, 9, 1))
 
 ```
 
@@ -122,8 +126,8 @@ Ok, now we have our full probability model: (**note to Josh** replace the priors
 $$
 \begin{align*}
 Pr(N,\space prop_p\mid y) &\propto Pick11Socks(y\mid N,\space prop_p) \\
-&\times Pr(N) \\
-&\times Pr(prop_p)
+&\times NegBinomial(N\mid 70, 6.4) \\
+&\times Beta(prop_p\mid 9, 1)
 \end{align*}
 $$
 
@@ -141,19 +145,20 @@ For this example we will use Approximate Bayesian Computation to approximate the
 Ok Step 1: Simulate parameters from the priors, let's run our algorithm a hundred thousand times and: Step 2: Simulate fake data and compare to the real data. We do this for every set of parameters. Our `pick_11_socks` function does this for us and returns a `T`/`F` for every set of parameters.
 
 ```{r}
-# n_picked <- 11 # The number of socks to pick out of the laundry
-# 
-# sock_sim <- replicate(100000, {
-#   # Generating a sample of the parameters from the priors
-#   prior_mu <- 30
-#   prior_sd <- 15
-#   prior_size <- prior_mu^2 / (prior_sd^2 - prior_mu)
-#   n_socks <- rnbinom(1, mu = prior_mu, size = prior_size)
-#   prop_pairs <- rbeta(1, shape1 = 18, shape2 = 2)
-#   pick_11_socks(n_socks, prop_pairs)
-# })
-# sock_sim <- t(sock_sim)
+n_picked <- 11 # The number of socks to pick out of the laundry
 
+sock_sim <- replicate(100000, {
+  # Generating a sample of the parameters from the priors
+  prior_mu <- 70
+  prior_sd <- 9
+  prior_size <- prior_mu^2 / (prior_sd^2 - prior_mu)
+  n_socks <- rnbinom(1, mu = prior_mu, size = prior_size)
+  prop_pairs <- rbeta(1, shape1 = 9, shape2 = 1)
+  pick_11_socks(n_socks, prop_pairs)
+})
+sock_sim <- t(sock_sim)
+
+head(sock_sim)
 
 ```
 
@@ -163,38 +168,75 @@ Step 3: Keep just the parameters that generate the data.
 # post_samples <- sock_sim[sock_sim[, "unique"] == 11 & 
 #                          sock_sim[, "pairs" ] == 0 , ]
 # post <- data.frame(post_samples)
+
+post_samples <- sock_sim[sock_sim[,"unique"]==11 & sock_sim[,"pairs"] == 0,]
+post <- data.frame(post_samples)
+head(post)
+
 ```
 
 Ok, now we have our posterior!
 
-##### Evaluate the fit and implications of our posterior (i.e. what  does it all mean)
+##### Evaluate the fit and implications of our posterior (i.e. what does it all mean)
 
 ```{r}
 # hist(post$n_pairs)
 # hist(post$n_socks)
 # hist(post$n_odd)
+sum(post$n_socks==77)/nrow(post)
+hist(post$n_socks)
+abline(v = quantile(post$n_socks, c(.025, .975)), col = "red", lwd = 3)
+abline(v = quantile(post$n_socks, c(.25, .75)), col = "blue", lwd = 3)
+quantile(post$n_socks, c(.01, .96))
 ```
 
 What is the probability of having less than 5 odd socks?
 
 ```{r}
-# sum(post$n_odd < 5)/nrow(post)
+sum(post$n_socks >= 77)/nrow(post)
+hist(post$n_socks)
+abline(v = 77, lwd = 3)
 ```
 
 What are the 95% and 50% **credible** intervals for the number of socks?
 
 ```{r}
-# # 95%
-# quantile(post$n_socks, c(.025, .975))
-# # 50%
-# quantile(post$n_socks, c(.25, .75))
+# 95%
+quantile(post$n_socks, c(.025, .975))
+# 50%
+quantile(post$n_socks, c(.25, .75))
 ```
 
 What have we learned about the number of socks? I.e. compare the prior to the posterior.
 
 ```{r}
-# hist(rnbinom(1e4, mu = 30, size = 15))
-# hist(post$n_socks)
+hist(rnbinom(1e4, mu = 70, size = 9))
+hist(post$n_socks)
+```
+
+```{r}
+n_socks <- 45
+prop_pair <- 42/45
+
+samp_2 <- pick_11_socks(n_socks = n_socks, prop_pairs = prop_pair)
+n_picked <- 11 # The number of socks to pick out of the laundry
+
+post_n_socks <- post$n_socks
+post_p_pair <- post$prop_pairs
+
+sock_sim <- replicate(1e5, {
+  # Generating a sample of the parameters from the priors
+  n_socks <- sample(post_n_socks, 1)
+  prop_pairs <- sample(post_p_pair, 1)
+  pick_11_socks(n_socks, prop_pairs)
+})
+sock_sim_2 <- t(sock_sim)
+
+head(sock_sim_2)
+
+post_sock_2 <- sock_sim_2[sock_sim_2[,"unique"]==9 & sock_sim_2[,"pairs"]==1,]
+
+hist(post_sock_2[,"n_socks"])
 ```
 
 Play around with the posterior to see what we have learned about Karl Broman's sock situation, then go back to the link above and see how many socks and singletons were actually in the dryer!
