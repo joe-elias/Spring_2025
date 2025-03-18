@@ -1,3 +1,7 @@
+---
+format: typst
+---
+
 ### This is the beginning of the Bayes sequence for the semester
 
 We will work on bayesian analysis for the next four meetings. The topics are:

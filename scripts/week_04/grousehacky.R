@@ -1,16 +1,16 @@
-install.packages("metafor")
+#install.packages("metafor")
 library(metafor)
 
 # Functions --------------------------------------------------------------------
-source("effect_functions.R")
+source("scripts/week_04/effect_functions.R")
 
 # Read in data -----------------------------------------------------------------
 # Read in the spreadsheet with metadata
-meta.dat <- as.data.frame(read.csv("Grouse meta-analysis - articles (2).csv"))
+meta.dat <- as.data.frame(read.csv("data/week_04/grouse_meta_analysis_articles.csv"))
 meta.dat$ES_ID <- paste(meta.dat$Article_ID,meta.dat$ES_ID)
 
 # Read in combined effect size data sheet 
-es.dat <- read.csv("grouse_es4.csv")
+es.dat <- read.csv("data/week_04/grouse_es4.csv")
 es.dat <- es.dat[!is.na(es.dat$Article_ID),]
 
 #take everything but first 12 columns of es.dat and removes commas and turns things into numbers 
@@ -74,6 +74,7 @@ ppc <- calc_dppc2(es.dat$m1p, es.dat$m1s,
                   es.dat$n1p, es.dat$n2p, 
                   es.dat$sd1p, es.dat$sd2p)
 ppc <- effectsize::d_to_r(ppc)
+
 # Proportions
 oddratio <- metafor::escalc("OR", ai=es.dat$n1*es.dat$prop1, bi=es.dat$n1*(1-es.dat$prop1), n1i = es.dat$n1,
                             ci=es.dat$n2*es.dat$prop2, di=es.dat$n2*(1-es.dat$prop2), n2i = es.dat$n2)
@@ -133,7 +134,7 @@ effects[!is.na(ds),-1] <- NA
 
 # Note: if there are multiple effects per study, we will need to resolve those
 # based on the most reliable measure, but this will all be post-hoc
-write.csv(effects, file="./duplicate-effects-check.csv")
+write.csv(effects, file="data/week_04/duplicate-effects-check.csv")
 
 #no duplicated when checked file 
 
@@ -188,30 +189,57 @@ es.dat$Habtype[es.dat$Habtype%in%c("agriculture", "agriculture ")] <- "agricultu
 
 #####Writing our mixed-effect models
 
-#Now without starvation experiments
 
 
+
+#Now without starvation experiments (remove article id = 1341)
+
+
+
+
+mod1b <- rma.mv(yi = effects,
+                V = 1/studyN,
+                mods = ~ Avgclutch + size + extype,
+                random = ~1|Article_ID/ES_ID,
+                data = es.dat,
+                subset = es.dat$Article_ID!=1341)
+
+summary(mod1c)
 
 ##### Plotting 
 # First, lets check out the distribution of effects 
 # what kind of distribution are we looking for? 
 
 
+hist(effects)
+
+
 # Lets check out effects over sample size 
 
 
-# Now, lets visualize publication bias/heterogeneity
+plot(effects, studyN)
 
+# Now, lets visualize publication bias/heterogeneity
+funnel(rma(effects, 1/studyN))
 
 # We can also make a forest plot to visualize all our effects
-
+forest(mod1b, slab = paste(es.dat$Species, es.dat$Article_ID, sep = "_"))
 
 # Plot moderators
 # Experiment type
 
+boxplot(effects ~ es.dat$extype, ylab = "effects", xlab = "driver")
+# Now we can zhuzh it up by adding our data points on top of boxplots
 
-# Now we can zhuzh it up by adding our data points on top of boxplot
-
+library(tidyverse)
+sum_stats <- es.dat %>% 
+  group_by(extype) %>% 
+  summarise(mean_effect = mean(effects, na.rm = T),
+            sd_effect = sd(effects, na.rm = T),
+            n = sum(!is.na(effects)),
+            lower_ci = mean_effect - qt(.975, df = n-1)*sd_effect/sqrt(n),
+            upper_ci = mean_effect - qt(.975, df = n-1)*sd_effect/sqrt(n))
+sum_stats
 
 # Average adult body size
 
