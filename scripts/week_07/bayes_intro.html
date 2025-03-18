@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.45">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>bayes_intro</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="bayes_intro_files/libs/clipboard/clipboard.min.js"></script>
+<script src="bayes_intro_files/libs/quarto-html/quarto.js"></script>
+<script src="bayes_intro_files/libs/quarto-html/popper.min.js"></script>
+<script src="bayes_intro_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="bayes_intro_files/libs/quarto-html/anchor.min.js"></script>
+<link href="bayes_intro_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="bayes_intro_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="bayes_intro_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="bayes_intro_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="bayes_intro_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+
+
+
+<section id="this-is-the-beginning-of-the-bayes-sequence-for-the-semester" class="level3">
+<h3 class="anchored" data-anchor-id="this-is-the-beginning-of-the-bayes-sequence-for-the-semester">This is the beginning of the Bayes sequence for the semester</h3>
+<p>We will work on bayesian analysis for the next four meetings. The topics are:</p>
+<ol type="1">
+<li><p>Introduction to and motivation for baysian data analysis.</p>
+<p>We will introduce the main process for constructing and analyzing bayesian models.</p></li>
+<li><p>Introduction to Stan</p>
+<p>We will gain experience utilizing Stan to approximate posteriors for our quantities of interest. We will do this using the familiar linear model.</p></li>
+<li><p>Hierarchical models in Stan</p>
+<p>We continue building experience with Stan through the development of a hierarchical model estimating growth rates in plants using an exponential growth model.</p></li>
+<li><p>Bring your own data, build your own model</p>
+<p>The final meeting of the bayes sequence will be an open work space where you bring data that you want to analyze (or may have already analyzed) and build a model to run in Stan!</p></li>
+</ol>
+</section>
+<section id="why-bayesian-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="why-bayesian-analysis">Why Bayesian analysis?</h3>
+<section id="what-is-bayesian-analysis" class="level4">
+<h4 class="anchored" data-anchor-id="what-is-bayesian-analysis">(What is Bayesian analysis?)</h4>
+<p>Bayesian modeling accounts for uncertainty in all observed and unobserved quantities in our model. We do this by explicitly specifying probabilities which allows us to quantify uncertainty in our inferences.</p>
+<p>This leads to what I see as two big advantages for applied researchers.</p>
+<section id="a-straightforward-approach-to-answering-our-questions-of-interest." class="level5">
+<h5 class="anchored" data-anchor-id="a-straightforward-approach-to-answering-our-questions-of-interest.">1. A straightforward approach to answering our questions of interest.</h5>
+<p>Let’s look at Bayes’ rule:</p>
+<p><span id="eq-1"><span class="math display">\[
+Pr( \boldsymbol{\theta} \mid data) = \frac{Pr(data\mid \boldsymbol{\theta})Pr(\boldsymbol{\theta})}{\Pr(data)}
+\tag{1}\]</span></span></p>
+<p><span class="math inline">\(Pr(data)\)</span> is the marginal probability of seeing the data, and except for the simplest cases, it is not possible to calculate, so we will cheat and ignore it. Since it is just a constant, we can write this as:</p>
+<p><span id="eq-2"><span class="math display">\[
+Pr(\boldsymbol{\theta}\mid data) \propto Pr(data\mid\boldsymbol{\theta})Pr(\boldsymbol{\theta})
+\tag{2}\]</span></span></p>
+<p>i.e.:</p>
+<p><span id="eq-3"><span class="math display">\[
+Posterior \propto Likelihood \times Prior
+\tag{3}\]</span></span></p>
+<p>The <span class="math inline">\(Likelihood\)</span> is the same that we use with our familiar maximum likelihood approaches. Look at equation 2 and see that this is the probability of the data given a set of parameters. Maximum likelihood is finding the set of parameters that maximizes the likelihood of getting our set of data. There are a couple problems with this:</p>
+<ol type="1">
+<li>I don’t care about the set of parameters that maximizes the likelihood of seeing the data, I collected the data to test my scientific theories as encoded by the parameters, I want to know what the probability of my hypothesis is given the data I collected. For that we need the <span class="math inline">\(Posterior\)</span>.</li>
+<li>This is only logical if all possible parameter values are equally likely. The logic is that the if we find the parameters that maximize our likelihood of getting this data-set, they are the most likely parameters. This may be the case, but it it depends on the <span class="math inline">\(Prior\)</span> probability of the parameters. This logic leaves us open to base rate neglect (aka the prosecutor’s fallacy). For a book-length diatribe see Audrey Clayton’s “Bernoulli’s Fallacy”</li>
+</ol>
+<p>So Bayes allows us to actually answer the questions we collected the data for.</p>
+</section>
+<section id="it-provides-a-principled-model-based-approach-regardless-of-the-question-or-complexity" class="level5">
+<h5 class="anchored" data-anchor-id="it-provides-a-principled-model-based-approach-regardless-of-the-question-or-complexity">2. It provides a principled model-based approach regardless of the question or complexity</h5>
+<p>For any model we would like to ask questions about, from something as simple as estimating the mean and variance of a data-set to genomic prediction with 100s of thousands of parameters, we use the same approach. (I am stealing this verbatim from Gelmen et al.’s “Bayesian Data Analysis”)</p>
+<ol type="1">
+<li>Setting up a <em>full probability model</em>—a joint probability distribution for all observable and unobservable quantities in a problem. The model should be consistent with knowledge about the underlying scientific problem and the data collection process.</li>
+<li>Conditioning on observed data: calculating and interpreting the appropriate <em>posterior distribution</em>—the conditional probability distribution of the unobserved quantities of ultimate interest, given the observed data.</li>
+<li>Evaluating the fit of the model and the implications of the resulting posterior distribution: how well does the model fit the data, are the substantive conclusions reasonable, and how sensitive are the results to the modeling assumptions in step 1? In response, one can alter or expand the model and repeat the three steps.</li>
+</ol>
+<p>To see how this works in practice. Let’s do a (hopefully) fun example together (stolen in it’s entirety from Rasmus Baath, see link below)!</p>
+</section>
+</section>
+</section>
+<section id="the-case-of-karl-bromans-socks" class="level3">
+<h3 class="anchored" data-anchor-id="the-case-of-karl-bromans-socks">The case of <a href="https://www.sumsar.net/blog/2014/10/tiny-data-and-the-socks-of-karl-broman/">Karl Broman’s Socks</a></h3>
+<p>Karl Broman is doing laundry and pulls out the first 11 socks from the dryer. He pulls out 11 unique socks! The question: How many socks are in the dryer? Additionally, we can ask how many pairs and how many singletons. This is a tiny data-set, only 1 observation of 11 socks, but we know the 3 steps we need to get an answer.</p>
+<section id="set-up-a-full-probability-model" class="level5">
+<h5 class="anchored" data-anchor-id="set-up-a-full-probability-model">Set up a full probability model</h5>
+<p>Let’s start by drawing a diagram (specifically a directed acyclic graph (d’ya like dags?)) of the model. Our observed quantity is the 11 socks. Our unobserved quantities: how many socks in the dryer, how many pairs, how many singletons. The dag might look like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="socks_dag.jpg" class="img-fluid figure-img"></p>
+<figcaption>Dag for Socks Model</figcaption>
+</figure>
+</div>
+<p>This is all we need to write out our full model! I’m going to use the convention that solid lines are stochastic relationships and dashed lines are deterministic. Quantities at the heads of arrows are influenced by those at the tails. Any parent-less quantities (no arrows come into it), with the exception of data that are measured without error, need priors. Let’s call number of socks <span class="math inline">\(N\)</span>, and proportion paired <span class="math inline">\(prop_p\)</span> and the data <span class="math inline">\(y\)</span>—for simplicity. So our full probability model is:</p>
+<p><span class="math display">\[
+\begin{align*}
+Pr(N,\space prop_p\mid y) &amp;\propto Pr(y\mid N, \space prop_p) \\
+&amp;\times Pr(N) \\
+&amp;\times Pr(prop_p)
+\end{align*}
+\]</span></p>
+<p><span class="math inline">\(Pr(y\mid N, \space prop_p)\)</span>, the likelihood, is a tough one, but luckily we can use Approximate Bayesian Computation (ABC) and we don’t need a specific likelihood as long as we can define the relationship and simulate from that. Here is an <code>R</code> function to do that:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pick_11_socks <span class="ot">&lt;-</span> <span class="cf">function</span>(n_socks, prop_pairs){</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  n_pairs <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">floor</span>(n_socks <span class="sc">/</span> <span class="dv">2</span>) <span class="sc">*</span> prop_pairs)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  n_odd <span class="ot">&lt;-</span> n_socks <span class="sc">-</span> n_pairs <span class="sc">*</span> <span class="dv">2</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Simulating picking out n_picked socks</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  socks <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">seq_len</span>(n_pairs <span class="sc">+</span> n_odd), <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>), <span class="fu">c</span>(n_pairs, n_odd)))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  picked_socks <span class="ot">&lt;-</span> <span class="fu">sample</span>(socks, <span class="at">size =</span>  <span class="fu">min</span>(n_picked, n_socks))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  sock_counts <span class="ot">&lt;-</span> <span class="fu">table</span>(picked_socks)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Returning the parameters and counts of the number of matched </span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># and unique socks among those that were picked out.</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">unique =</span> <span class="fu">sum</span>(sock_counts <span class="sc">==</span> <span class="dv">1</span>), <span class="at">pairs =</span> <span class="fu">sum</span>(sock_counts <span class="sc">==</span> <span class="dv">2</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_socks =</span> n_socks, <span class="at">n_pairs =</span> n_pairs, <span class="at">n_odd =</span> n_odd, <span class="at">prop_pairs =</span> prop_pairs)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ok, we have a way to simulate picking 11 socks for a given <span class="math inline">\(N\)</span> and <span class="math inline">\(prop_p\)</span>. Now we need prior distributions for these unobserved parameters. This is a situation where we have tiny data, so we can’t afford to use priors with little information, we need to try to make fairly informative priors. Luckily we have some lived experience with socks, so let’s get a prior distribution for the number of socks. We need to:</p>
+<ol type="1">
+<li>Pick the distributions:
+<ol type="1">
+<li><span class="math inline">\(N\)</span> remember, socks come in discrete (well usually), positive values (can’t have negative socks).</li>
+<li><span class="math inline">\(prop_p\)</span> is a proportion so: <span class="math inline">\(0 \leq prop_p \leq 1\)</span></li>
+</ol></li>
+<li>Pick the parameters: find parameters for the chosen distributions that give an informative distribution that still accounts for our uncertainty.
+<ol type="1">
+<li>Hint: <span class="math inline">\(\mu\)</span> in <span class="math inline">\(Beta(x\mid\alpha,\beta)\)</span> is <span class="math inline">\(\frac{\alpha}{\alpha+\beta}\)</span></li>
+<li>Hint: The negative binomial function in <code>R</code> can be parameterized as <span class="math inline">\(\mu\)</span> and <span class="math inline">\(size=\frac{\mu}{\sigma^2 - \mu}\)</span></li>
+</ol></li>
+</ol>
+<p>Discuss and play around with distributions in <code>R</code> until you are happy with your choice of priors!</p>
+<p>Ok, now we have our full probability model: (<strong>note to Josh</strong> replace the priors below when they are chosen)</p>
+<p><span class="math display">\[
+\begin{align*}
+Pr(N,\space prop_p\mid y) &amp;\propto Pick11Socks(y\mid N,\space prop_p) \\
+&amp;\times Pr(N) \\
+&amp;\times Pr(prop_p)
+\end{align*}
+\]</span></p>
+<p>We have a full probability model for our problem! Now we need to introduce it to our data.</p>
+</section>
+<section id="condition-our-model-on-our-well-karl-bromans-observation" class="level5">
+<h5 class="anchored" data-anchor-id="condition-our-model-on-our-well-karl-bromans-observation">Condition our model on our (well, Karl Broman’s) observation</h5>
+<p>For this example we will use Approximate Bayesian Computation to approximate the posterior. This uses 3 steps.</p>
+<ol type="1">
+<li>Simulate a set of parameters from the prior distribution(s)</li>
+<li>Using the simulated parameters simulate a data-set</li>
+<li>If the simulated data-set is sufficiently(what sufficiently means here is a little arbitrary and affects the efficiency of the algorithm) close to the observed data-set, keep the parameter values, otherwise discard.</li>
+<li>Repeat steps 1:3 many, many times.</li>
+</ol>
+<p>Ok Step 1: Simulate parameters from the priors, let’s run our algorithm a hundred thousand times and: Step 2: Simulate fake data and compare to the real data. We do this for every set of parameters. Our <code>pick_11_socks</code> function does this for us and returns a <code>T</code>/<code>F</code> for every set of parameters.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># n_picked &lt;- 11 # The number of socks to pick out of the laundry</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># sock_sim &lt;- replicate(100000, {</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   # Generating a sample of the parameters from the priors</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   prior_mu &lt;- 30</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   prior_sd &lt;- 15</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   prior_size &lt;- prior_mu^2 / (prior_sd^2 - prior_mu)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   n_socks &lt;- rnbinom(1, mu = prior_mu, size = prior_size)</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   prop_pairs &lt;- rbeta(1, shape1 = 18, shape2 = 2)</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   pick_11_socks(n_socks, prop_pairs)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co"># })</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># sock_sim &lt;- t(sock_sim)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Step 3: Keep just the parameters that generate the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># post_samples &lt;- sock_sim[sock_sim[, "unique"] == 11 &amp; </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#                          sock_sim[, "pairs" ] == 0 , ]</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># post &lt;- data.frame(post_samples)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ok, now we have our posterior!</p>
+</section>
+<section id="evaluate-the-fit-and-implications-of-our-posterior-i.e.-what-does-it-all-mean" class="level5">
+<h5 class="anchored" data-anchor-id="evaluate-the-fit-and-implications-of-our-posterior-i.e.-what-does-it-all-mean">Evaluate the fit and implications of our posterior (i.e.&nbsp;what does it all mean)</h5>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># hist(post$n_pairs)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># hist(post$n_socks)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># hist(post$n_odd)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>What is the probability of having less than 5 odd socks?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sum(post$n_odd &lt; 5)/nrow(post)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>What are the 95% and 50% <strong>credible</strong> intervals for the number of socks?</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # 95%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># quantile(post$n_socks, c(.025, .975))</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># # 50%</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># quantile(post$n_socks, c(.25, .75))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>What have we learned about the number of socks? I.e. compare the prior to the posterior.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># hist(rnbinom(1e4, mu = 30, size = 15))</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># hist(post$n_socks)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Play around with the posterior to see what we have learned about Karl Broman’s sock situation, then go back to the link above and see how many socks and singletons were actually in the dryer!</p>
+</section>
+<section id="mcmc-with-a-metropolis-hastings-algorithm." class="level4">
+<h4 class="anchored" data-anchor-id="mcmc-with-a-metropolis-hastings-algorithm.">MCMC with a Metropolis-Hastings algorithm.</h4>
+<p>Hopefully that was an instructive introduction to bayesian analysis. In the socks example, we used Approximate Bayesian Computation to get at the posterior. This is very powerful, but does not scale well with complexity of the model. In this section, we will do a quick introduction to Markhov Chain Monte Carlo methods. One of the earliest algorithms (used in the Manhattan Project) is the Metropolis-Hastings algorithm. This is a fairly straightforward algorithm that we can code up in <code>R</code>, (see below). It works by sampling from a proposal distribution, and then comparing the likelihood of the proposal to the current value. If the proposal is more likely, it is always accepted, if the proposal is less likely, it is accepted with a probability of <span class="math inline">\(\frac{Pr(proposal)}{Pr(current)}\)</span>. This allows the chain to wonder around the parameter space while sampling the most likely parameters and approximating the posterior. See <a href="https://chi-feng.github.io/mcmc-demo/app.html#EfficientNUTS,banana">here</a> for an example (go to the random walk mh setting for Metropolis-Hastings).</p>
+<p>Let’s look at a generic linear model with just one predictor.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fl">1.5</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fl">1.8</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(n, a <span class="sc">+</span> b<span class="sc">*</span>x, sigma)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(y <span class="sc">~</span> x)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">a =</span> a, <span class="at">b =</span> b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="bayes_intro_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s fit a bayesian model to see if we can recover our parameters. Remember the first step is to set up a full probability model. We will use a normal likelihood so here are the visual:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="linear_mod_dag.jpg" class="img-fluid figure-img"></p>
+<figcaption>Linear Model DAG</figcaption>
+</figure>
+</div>
+<p>And Mathy models:</p>
+<p><span class="math display">\[
+\begin{align*}
+\mu_i &amp;= \alpha + \beta x_i \\
+Pr(\alpha, \beta, \sigma\mid \boldsymbol{y}) &amp;\propto \prod_{i=1}^n N(y_i\mid \mu_i,\sigma) \\
+&amp;\times Pr(\alpha)Pr(\beta)Pr(\sigma)
+\end{align*}
+\]</span></p>
+<p>We need to figure out some priors for <span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span>, and <span class="math inline">\(\sigma\)</span>. Do that below. Hint: simulate from your priors and see if it yields reasonable predictions.</p>
+<p>Add the Priors to the mathy model:</p>
+<p><span class="math display">\[
+\begin{align*}
+\mu_i &amp;= \alpha + \beta x_i \\
+Pr(\alpha, \beta, \sigma\mid \boldsymbol{y}) &amp;\propto \prod_{i=1}^n N(y_i\mid \mu_i,\sigma) \\
+&amp;\times  \\
+&amp;\times \\
+&amp;\times  \\
+\end{align*}
+\]</span></p>
+<p>Now that we have the priors we need to condition on the data using MCMC:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># a_post &lt;- b_post &lt;- sig_post &lt;- c()</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># a_post[1] &lt;- rnorm(1)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># b_post[1] &lt;- rnorm(1)</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># sig_post[1] &lt;- rexp(1)</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># a_accept &lt;- b_accept &lt;- sig_accept &lt;- 0</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co"># for(i in 1:1e5){</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   # draw a proposal for a</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   a_ast &lt;- rnorm(1, a_post[i], .1)</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   # calculate prob of keeping a_ast</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   r &lt;- exp((sum(dnorm(y, a_ast + b_post[i]*x, sig_post[i], log = T))+</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#             dnorm(a_ast,0, 1, log = T)) -</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#           (sum(dnorm(y, a_post[i] + b_post[i]*x, sig_post[i], log = T))+</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#             dnorm(a_post[i],0,1,log = T)))</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   # decide to keep the proposal or previous value</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#   a_post[i+1] &lt;- ifelse(runif(1) &lt; r, a_ast, a_post[i])</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co">#   if(a_post[i+1]!=a_post[i]) a_accept &lt;- a_accept + 1</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   # draw a proposal for b</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co">#   b_ast &lt;- rnorm(1, b_post[i], .1)</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">#   # calculate the probability of keeping b_ast</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co">#   r &lt;- exp((sum(dnorm(y, a_post[i+1] + b_ast*x, sig_post[i], log = T))+</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#             dnorm(b_ast,0, 1, log = T)) -</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co">#           (sum(dnorm(y, a_post[i+1] + b_post[i]*x, sig_post[i], log = T))+</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="co">#             dnorm(b_post[i],0,1,log = T)))</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co">#   # decide whether to keep b_ast or the previous value</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co">#   b_post[i+1] &lt;- ifelse(runif(1) &lt; r, b_ast, b_post[i])</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a><span class="co">#   if(b_post[i+1]!=b_post[i]) b_accept &lt;- b_accept + 1</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co">#   # draw a proposal for sigma</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co">#   sig_ast &lt;- rgamma(1, sig_post[i]^2/.003, sig_post[i]/.003)</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co">#   # calculate prob of keeping sig_ast (need to adjust for asymmetry of proposal in the next step)</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="co">#   r &lt;- (sum(dnorm(y, a_post[i+1] + b_post[i+1]*x, sig_ast, log = T))+</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a><span class="co">#               dexp(sig_ast, 1, log = T)) -</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a><span class="co">#             (sum(dnorm(y, a_post[i+1] + b_post[i+1]*x, sig_post[i], log = T))+</span></span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="co">#               dexp(sig_post[i], 1, log = T))</span></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co">#   # adjust for asymmetry of proposal</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="co">#   q &lt;- dgamma(sig_post[i], sig_ast^2/.003, sig_ast/.003, log = T) -</span></span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a><span class="co">#             dgamma(sig_ast, sig_post[i]^2/.003, sig_post[i]/.003, log = T)</span></span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a><span class="co">#   r &lt;- exp(r + q)</span></span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a><span class="co">#   # decide whether to keep proposal</span></span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a><span class="co">#   sig_post[i+1] &lt;- ifelse(runif(1) &lt; r, sig_ast, sig_post[i])</span></span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a><span class="co">#   if(sig_post[i+1]!=sig_post[i]) sig_accept &lt;- sig_accept + 1</span></span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a><span class="co">#   if(i%%5000==0) print(paste0("Iteration ", i, " complete!"))</span></span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Check the chains:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># check the chains</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(a_post[2000:1e5], type = "l")</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># abline(h = a, col = "red", lwd = 2)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(b_post[2000:1e5], type = "l")</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># abline(h = b, col = "red", lwd = 2)</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># plot(sig_post[2000:1e5], type = "l")</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># abline(h = sigma, col = "red", lwd = 2)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Look at the posteriors:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># thin &lt;- (1:1e5)&gt;=2000 &amp; (1:1e5)%%5==0</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># a_post &lt;- a_post[thin]</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># b_post &lt;- b_post[thin]</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># sig_post &lt;- sig_post[thin]</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># hist(a_post)</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co"># abline(v = a, col = "red", lwd = 3)</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># hist(b_post)</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># abline(v = b, col = "red", lwd = 3)</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="co"># hist(sig_post)</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co"># abline(v = sigma, col = "red", lwd = 3)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
