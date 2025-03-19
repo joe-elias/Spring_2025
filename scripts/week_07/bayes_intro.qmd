@@ -79,15 +79,16 @@ Let's start by drawing a diagram (specifically a directed acyclic graph (d'ya li
 
 This is all we need to write out our full model! I'm going to use the convention that solid lines are stochastic relationships and dashed lines are deterministic. Quantities at the heads of arrows are influenced by those at the tails. Any parent-less quantities (no arrows come into it), with the exception of data that are measured without error, need priors. Let's call number of socks $N$, and proportion paired $prop_p$ and the data $y$—for simplicity. So our full probability model is:
 
-$$
-\begin{align*}
-Pr(N,\space prop_p\mid y) &\propto Pr(y\mid N, \space prop_p) \\
-&\times Pr(N) \\
-&\times Pr(prop_p)
-\end{align*}
-$$
+```{=typst}
+$ "Pr(N, prop"_p" | y)" &prop "Pr(y | N, prop"_p")" \
+  &times "Pr(N)" \
+  &times "Pr(prop"_p")" $
+```
 
-$Pr(y\mid N, \space prop_p)$, the likelihood, is a tough one, but luckily we can use Approximate Bayesian Computation (ABC) and we don't need a specific likelihood as long as we can define the relationship and simulate from that. Here is an `R` function to do that:
+```{=typst}
+$"Pr(y | N, prop"_p")"$
+```
+, the likelihood, is a tough one, but luckily we can use Approximate Bayesian Computation (ABC) and we don't need a specific likelihood as long as we can define the relationship and simulate from that. Here is an `R` function to do that:
 
 ```{r}
 pick_11_socks <- function(n_socks, prop_pairs){
@@ -127,14 +128,11 @@ hist(rbeta(1e4, 9, 1))
 
 Ok, now we have our full probability model:
 
-$$
-\begin{align*}
-Pr(N,\space prop_p\mid y) &\propto Pick11Socks(y\mid N,\space prop_p) \\
-&\times NegBinomial(N\mid 70, 6.4) \\
-&\times Beta(prop_p\mid 9, 1)
-\end{align*}
-$$
-
+```{=typst}
+$ "Pr(N, prop"_p" | y)" &prop "Pick11Socks(y | N, prop"_p")" \
+      &times "NegBinomial(N | 70, 6.4)" \
+      &times "Beta(prop"_p"| 9, 1)" $
+```
 We have a full probability model for our problem! Now we need to introduce it to our data.
 
 ##### Condition our model on our (well, Karl Broman's) observation
@@ -234,28 +232,22 @@ Let's fit a bayesian model to see if we can recover our parameters. Remember the
 
 And Mathy models:
 
-$$
-\begin{align*}
-\mu_i &= \alpha + \beta x_i \\
-Pr(\alpha, \beta, \sigma\mid \boldsymbol{y}) &\propto \prod_{i=1}^n N(y_i\mid \mu_i,\sigma) \\
-&\times Pr(\alpha)Pr(\beta)Pr(\sigma)
-\end{align*}
-$$
-
+```{=typst}
+$ mu_i &= alpha + beta x_i \
+    "Pr("alpha, beta, sigma "|" bold(y)")" &prop product_(i=1)^n"Pr("y_i "|" mu_i,sigma")" \
+    &times "Pr("alpha")Pr("beta")Pr("sigma")" $
+```
 We need to figure out some priors for $\alpha$, $\beta$, and $\sigma$. Do that below. Hint: simulate from your priors and see if it yields reasonable predictions.
 
 Add the Priors to the mathy model:
 
-$$
-\begin{align*}
-\mu_i &= \alpha + \beta x_i \\
-Pr(\alpha, \beta, \sigma\mid \boldsymbol{y}) &\propto \prod_{i=1}^n Normal(y_i\mid \mu_i,\sigma) \\
-&\times  Normal(\alpha\mid0,1) \\
-&\times Normal(\beta\mid0,1)\\
-&\times  Exponential(\sigma\mid1) \\
-\end{align*}
-$$
-
+```{=typst}
+$ mu_i &= alpha + beta x_i \
+    "Pr("alpha, beta, sigma "|" bold(y)")" &prop product_(i=1)^n"Normal("y_i "|" mu_i,sigma")" \
+    &times "Normal("alpha"|0,1)" \
+    &times "Normal("beta"|0,1)" \
+    &times "Exponential("sigma"|1)" $
+```
 Now that we have the priors we need to condition on the data using MCMC, normally you would use multiple chains to make sure they have converged on the true posterior, but this is just an example. Here is the code to get a single chain for each parameter:
 
 ```{r}
