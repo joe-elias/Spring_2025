@@ -30,7 +30,7 @@ cmdstanr::check_cmdstan_toolchain(fix = T)
 
 ```
 
-My toolchain is good to go! If yours is as well, you can skip down to "Installing CmdStan", if not , the next step is to setup the toolchain—*Deep breaths!* **Linux** and **Mac** users, follow the instructions here: <https://mc-stan.org/install/#prerequisite-c17-toolchain> and then run the above command again.
+My toolchain is good to go! If yours is as well, you can skip down to "Installing CmdStan", if not , the next step is to setup the toolchain—*Deep breath!* **Linux** and **Mac** users, follow the instructions here: <https://mc-stan.org/install/#prerequisite-c17-toolchain> and then run the above command again.
 
 For **Windows** folks, we need to go on a bit of an adventure. Go here <https://cran.r-project.org/bin/windows/Rtools/rtools44/rtools.html> and download and run the Rtools44 installer. Once it is installed, you will need to update your `PATH` variable, see the instructions here: <https://helpdeskgeek.com/add-windows-path-environment-variable/> and add: `C:rtools44\usr\bin` to the paths list.
 
