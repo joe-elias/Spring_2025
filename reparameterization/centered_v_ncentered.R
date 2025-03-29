@@ -53,7 +53,7 @@ fit_c <- mod_c$sample(
 )
 
 # so we have 37 divergent transitions, immediately we know we 
-# can't trust this computation, let's look at rhat and ess:
+# can't trust this output, let's look at rhat and ess:
 
 fit_c$print()
 
