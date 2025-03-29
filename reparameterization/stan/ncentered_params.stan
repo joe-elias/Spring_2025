@@ -6,13 +6,14 @@ data{
   array[N] int groups;
 }
 parameters{
-  real tau;
-  real b;
-  real a_bar;
-  vector[J] z_j;
-  real<lower=0> sigma;
+  real tau; // log of the standard deviation of the group intercepts
+  real b; // slope
+  real a_bar; // mean of the intercept distribution
+  vector[J] z_j; // z scaled value for the group intercept
+  real<lower=0> sigma; // error around the predicted value
 }
 transformed parameters{
+  // calculate the intercepts from the z scores, standard deviation, and mean
   vector[J] a_j = z_j * exp(tau) + a_bar;
 }
 model{

@@ -6,11 +6,11 @@ data{
   array[N] int groups;
 }
 parameters{
-  real tau;
-  real b;
-  real a_bar;
-  vector[J] a_j;
-  real<lower=0> sigma;
+  real tau; // log of the standard deviation of the intercepts
+  real b; // slope
+  real a_bar; // mean of the distribution of intercepts
+  vector[J] a_j; // intercept of each group
+  real<lower=0> sigma; // error around the predicted values
 }
 model{
   // hyper-priors for the intercept
