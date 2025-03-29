@@ -24,6 +24,8 @@ fit_bern <- mod_bern$sample(
   parallel_chains = 4
 )
 
+
+
 fit_bern$diagnostic_summary()
 
 fit_bern$print()
