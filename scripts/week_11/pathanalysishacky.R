@@ -1,8 +1,8 @@
 # load everything in
-
-install.packages("piecewiseSEM")
-install.packages("glmmTMB")
-install.packages("multcompView")
+# install these packages if you don't have them
+# install.packages("piecewiseSEM")
+# install.packages("glmmTMB")
+# install.packages("multcompView")
 
 library(piecewiseSEM)
 library(glmmTMB)
@@ -10,11 +10,13 @@ library(multcompView)
 
 # intro example showing why path analysis can be useful/important for highly interconnected systems
 
-c = rnorm(200)
+n <- 1000
 
-b = rnorm(200, c, 1)
+c <- rnorm(n)
 
-a = rnorm(200, b + c, 1)
+b <- rnorm(n, c, 1)
+
+a <- rnorm(n, b + c, 1)
 
 dat<-data.frame(a,b,c)
 
@@ -23,8 +25,15 @@ summary(amod)
 
 bmod <- lm(b ~ c, data = dat)
 
+
+
 model <- psem(amod, bmod)
 summary(model)
+
+summary(lm(a ~ b))
+
+
+
 
 
 # zero inflation example
