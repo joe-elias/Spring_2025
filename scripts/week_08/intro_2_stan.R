@@ -89,8 +89,35 @@ sigma <- rexp(1, 1/10)
 
 y <- rnorm(n, mu[group], sigma)
 
+mod_multi <- cmdstan_model("scripts/week_08/stan_files/multiple_ints.stan")
 
+dat_multi <- list(
+  N = n,
+  J = length(unique(group)),
+  y = y,
+  group = group
+)
 
+fit_multi <- mod_multi$sample(
+  data = dat_multi,
+  chains = 4,
+  parallel_chains = 4
+)
+
+# check diagnostics
+fit_multi$diagnostic_summary()
+
+# check rhat and ess
+
+fit_multi$print()
+
+# trace plots for mu
+
+mcmc_trace(fit_multi$draws("mu"))
+
+# distribution of mu
+
+mcmc_intervals(fit_multi$draws("mu"))
 
 # Linear Regression -------------------------------------------------------
 
@@ -130,14 +157,40 @@ mcmc_intervals(linear_fit$draws("sigma"))
 
 # Logistic Regression -----------------------------------------------------
 
-a <- rnorm(1, 0, .25)
-b <- rnorm(1, 0, .5)
+a <- rnorm(100, 0, 1.5)
+b <- rnorm(100, 0, 1)
+
+plot(NULL, xlim = c(-2, 2), ylim = c(0, 1), xlab = "Predictor",
+     ylab = "Probability")
+
+pred <- seq(-2, 2, l = 100)
+
+for(i in 1:100) lines(plogis(a[i] + b[i]*pred) ~ pred)
+
+
+
+
+
+a <- rnorm(1, 0, 1)
+b <- rnorm(1, 0, )
 x <- rnorm(n)
 y <- rbinom(n, 1, plogis(a + b*x))
 
+mod_logistic <- cmdstan_model("scripts/week_08/stan_files/logistic.stan")
+
+dat_logistic <- list(
+  N = n,
+  y = y,
+  x = x
+)
+
+fit_logistic <- mod_logistic$sample(
+  data = dat_logistic,
+  chains = 4,
+  parallel_chains = 4
+)
 
 
+fit_logistic$print()
 
-
-
-
+mcmc_trace(fit_logistic$draws(c("alpha", "beta")))
